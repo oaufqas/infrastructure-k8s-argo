@@ -22,5 +22,3 @@ db:
   saname: db-sa
 ssl:
   enabled: false
-
-test: true
