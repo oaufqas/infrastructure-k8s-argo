@@ -21,7 +21,7 @@
   - name: Generation apps..
     template:
       src: "apps-generator.yaml.j2"
-      dest: "{{ appsdir }}/{{ item.app_name }}.yaml"
+      dest: "{{ item.dest }}"
     loop:
       - { app_name: vault,
           namespace: vault, 
@@ -29,6 +29,7 @@
           chart_path: "vault/", 
           values_repo: "{{ app_repo }}", 
           values_path: "/values/{{ deploy_on }}/vault-values.yaml",
+          dest: "{{ playbook_dir }}/../vault-app.yaml",
           wave: "-10" }
       - { app_name: app,
           namespace: default, 
@@ -36,6 +37,7 @@
           chart_path: "app-chart/", 
           values_repo: "{{ app_repo }}", 
           values_path: "/values/{{ deploy_on }}/app-values.yaml",
+          dest: "{{ appsdir }}/app.yaml",
           wave: "1" }
       - { app_name: victoria-logs,
           namespace: monitoring, 
@@ -43,6 +45,7 @@
           chart_path: "victoria-logs-single/", 
           values_repo: "{{ app_repo }}", 
           values_path: "/values/{{ deploy_on }}/victoria-logs-values.yaml",
+          dest: "{{ appsdir }}/victoria-logs.yaml",
           wave: "-7" }
       - { app_name: victoria-metrics,
           namespace: monitoring, 
@@ -50,6 +53,7 @@
           chart_path: "victoria-metrics-k8s-stack/", 
           values_repo: "{{ app_repo }}", 
           values_path: "/values/{{ deploy_on }}/victoria-metrics-values.yaml",
+          dest: "{{ appsdir }}/victoria-metrics.yaml",
           wave: "-6" }
       - { app_name: external-secrets,
           namespace: external-secrets, 
@@ -57,6 +61,7 @@
           chart_path: "external-secrets/", 
           values_repo: "{{ app_repo }}", 
           values_path: "/values/{{ deploy_on }}/external-secrets-values.yaml",
+          dest: "{{ appsdir }}/external-secrets.yaml",
           wave: "-4" }
       - { app_name: ingress-nginx,
           namespace: ingress-nginx, 
@@ -64,6 +69,7 @@
           chart_path: "ingress-nginx/", 
           values_repo: "{{ app_repo }}", 
           values_path: "/values/{{ deploy_on }}/ingress-values.yaml",
+          dest: "{{ appsdir }}/ingress-nginx.yaml",
           wave: "-3" }
 
     

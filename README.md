@@ -1,5 +1,7 @@
 <div align="center">
-Проект представляет собой реализацию современного производственного (Production-ready) цикла для развертывания fullstack приложения в кластере kubernetes, управления инфраструктурой и доставки обновлений в облаке Yandex Cloud.
+
+#### Проект представляет собой реализацию современного производственного (Production-ready) цикла для развертывания fullstack приложения в кластере kubernetes, управления инфраструктурой и доставки обновлений в нескольких инфраструктурных решениях: облаке Yandex Cloud, на виртуальнах машинах proxmox. Проект полностью автоматизирован с помощью ansible ролей.
+
   <div>
     <img src="https://img.shields.io/badge/Architecture-K8s-blue" height="20"/>
     <img width="12" />
@@ -73,7 +75,7 @@ VictoriaLogs & Vector: Централизованный сбор и агрега
 
 ![alt text](./images/image2.png)
 
-# Технологический стек
+## Технологический стек
 
 ### Infrastructure & Orchestration
 
@@ -102,7 +104,7 @@ VictoriaLogs & Vector: Централизованный сбор и агрега
 |VictoriaMetrics | Latest | Сбор и хранение метрик
 |VictoriaLogs | Latest | Сбор и хранение логов
 |Grafana | 10+ | Визуализация метрик и логов
-|Promtail | Latest | Агент сбора логов
+|Vector | Latest | Агент сбора логов
 
 ### Networking & Storage
 
@@ -120,21 +122,21 @@ VictoriaLogs & Vector: Централизованный сбор и агрега
 |Frontend | React, Vite, CSS, MobX, Axios
 |Database | MySQL 8.0 (StatefulSet + PVC)
 
-# Компоненты и их взаимодействие
+## Компоненты и их взаимодействие
 
-## CI/CD Pipeline Flow
+### CI/CD Pipeline Flow
 
 ![alt text](./images/image3.png)
 
-## Security Flow (Vault + ESO)
+### Security Flow (Vault + ESO)
 
 ![alt text](./images/image4.png)
 
-## Observability Flow
+### Observability Flow
 
 ![alt text](./images/image5.png)
 
-# CI/CD Pipeline
+## CI/CD Pipeline
 
 ```yaml
 stages:
@@ -175,14 +177,14 @@ update_manifests:
     - git push origin master
 ```
 
-Pipeline Steps:
+### Pipeline Steps:
 
 Build — сборка Docker образа с многоступенчатой оптимизацией и публикация образа в Docker Container Registry.
 
 Deploy — обновление values.yaml путем коммита в инфраструктурном репозитории (GitHub) с новым тегом.
 
 
-# Инфраструктура безопасности: Vault + YC KMS + External Secrets Operator
+## Инфраструктура безопасности: Vault + YC KMS + External Secrets Operator
 
 ```yaml
 # Взаимодействие компонентов
@@ -250,7 +252,7 @@ Certificate
 
 ```
 
-# Мониторинг и Observability
+## Мониторинг и Observability
 
 Метрики (VictoriaMetrics)
 
@@ -367,7 +369,7 @@ argocd-infrastructure-repo/
 └── root-app.yaml           # Точка входа (App of Apps)
 ```
 
-# Быстрый старт
+## Быстрый старт
 
 Prerequisites
 

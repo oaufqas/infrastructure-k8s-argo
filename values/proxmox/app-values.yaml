@@ -12,7 +12,6 @@ server:
   pvcname: server-shared-storage
   storage: 2Gi
   appsecret: server-values 
-  # saname: server-sa
 db:
   name: mysql
   image: mysql:8.0

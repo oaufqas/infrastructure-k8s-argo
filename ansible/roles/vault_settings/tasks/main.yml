@@ -3,7 +3,41 @@
   delegate_to: localhost
   run_once: true
   block:
+
+  - name: Waiting for ArgoCD pods to start..
+    kubernetes.core.k8s_info:
+      kind: Pod
+      namespace: argocd
+      label_selectors:
+        - "app.kubernetes.io/name=argocd-server"
+    register: argocd_pods
+    until: 
+      - argocd_pods.resources | length > 0
+      - argocd_pods.resources[0].status.phase == "Running"
+      - (argocd_pods.resources[0].status.containerStatuses | map(attribute='ready') | list | unique) == [True]
+    retries: 30
+    delay: 10
+
+
+  - name: Applying vault application..
+    kubernetes.core.k8s:
+      src: "{{ playbook_dir }}/../vault-app.yaml"
+      state: present
+
+
+  - name: Waiting for Vault pods to start..
+    kubernetes.core.k8s_info:
+      kind: Pod
+      namespace: vault
+      label_selectors:
+        - "app.kubernetes.io/instance=vault"
+    register: vault_pod
+    until: 
+      - vault_pod.resources | length > 0
+    retries: 30
+    delay: 10
     
+
   - name: Creating service for vault..
     kubernetes.core.k8s:
       src: "{{ role_path }}/files/vault-svc.yaml"
@@ -17,7 +51,7 @@
       status_code: [ 200, 429, 472, 473, 501, 503 ]
       return_content: yes
     register: current_vault_status
-    ignore_errors: yes
+    ignore_errors: true
 
 
   - name: Analyzation vault status..
@@ -86,7 +120,6 @@
             key: "{{ item }}"
           status_code: 200
         loop: "{{ vault_unseal_keys[:secret_threshold | int] }}"
-
 
 
   - name: Settings up vault..
@@ -228,6 +261,8 @@
             API_URL: "{{ API_URL }}"
             CLIENT_URL: "{{ CLIENT_URL }}"
         status_code: [ 200, 204 ]
+      retries: 3
+      delay: 5
 
 
     - name: Saving the initial database secrets in vault..
