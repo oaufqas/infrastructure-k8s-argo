@@ -1,5 +1,5 @@
 ---
-- name: Generation manifests argocd..
+- name: Generation manifests argocd & git push changes..
   delegate_to: localhost
   run_once: true
   block:
@@ -93,3 +93,31 @@
           values_repo: "{{ app_repo }}", 
           values_path: "/values/{{ deploy_on }}/nfs-values.yaml",
           wave: "-2" }
+
+
+- name: Checking for changes in apps or values..
+  command: git status --porcelain apps/ values/ root-app.yaml vault-app.yaml
+  args:
+    chdir: "{{ playbook_dir }}/../"
+  register: git_status
+  changed_when: false
+
+
+- name: Commit block..
+  when: git_status.stdout != ""
+  block:
+    - name: Add changes to Git..
+      command: git add apps/ values/ root-app.yaml vault-app.yaml
+      args:
+        chdir: "{{ playbook_dir }}/../"
+
+    - name: Git commit..
+      command: git commit -m "[Ansible Robot] Update configuration cluster"
+      args:
+        chdir: "{{ playbook_dir }}/../"
+
+    - name: Push to repository..
+      command: git push origin master
+      ignore_errors: true
+      args:
+        chdir: "{{ playbook_dir }}/../"

@@ -1,26 +1,7 @@
 - name: Applying applications manifests..
   delegate_to: localhost
   run_once: true
-  block:  
-
-  - name: Checking for changes in apps or values..
-    shell: "cd {{ playbook_dir }}/../ && git status --porcelain apps/ values/ root-app.yaml vault-app.yaml"
-    register: git_status
-    changed_when: false
-
-
-  - name: Commit block..
-    block:
-      - name: Add changes to Git..
-        shell: "cd {{ playbook_dir }}/../ && git add apps/ values/ root-app.yaml vault-app.yaml"
-
-      - name: Git commit..
-        command: cd {{ playbook_dir }}/../ && git commit -m "Update configuration cluster"
-
-      - name: Push to repository..
-        command: "cd {{ playbook_dir }}/../ && git push origin master"
-    when: git_status.stdout != ""
-
+  block:
 
   - name: Waiting for ArgoCD pods to start..
     kubernetes.core.k8s_info:
@@ -33,6 +14,20 @@
       - argocd_pods.resources | length > 0
       - argocd_pods.resources[0].status.phase == "Running"
       - (argocd_pods.resources[0].status.containerStatuses | map(attribute='ready') | list | unique) == [True]
+    retries: 30
+    delay: 10
+
+
+  - name: Waiting for Vault pods to start..
+    kubernetes.core.k8s_info:
+      kind: Pod
+      namespace: vault
+      label_selectors:
+        - "app.kubernetes.io/instance=vault"
+    register: vault_pod
+    until: 
+      - vault_pod.resources | length > 0
+      - vault_pod.resources[0].status.phase == "Running"
     retries: 30
     delay: 10
 

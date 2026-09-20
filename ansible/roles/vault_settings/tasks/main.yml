@@ -33,6 +33,7 @@
         - "app.kubernetes.io/instance=vault"
     register: vault_pod
     until: 
+      - vault_pod.resources[0].status.phase == "Running"
       - vault_pod.resources | length > 0
     retries: 30
     delay: 10
@@ -86,6 +87,7 @@
         status_code: 200
       register: init_result
 
+
     - name: Preservation keys to file..
       copy:
         content: |
@@ -94,6 +96,7 @@
         dest: "{{ vault_keys_file }}"
         mode: '0600'
 
+
     - name: Initialization completed..
       debug:
         msg: Vault initialized. Keys stored in {{ vault_keys_file }}
@@ -101,9 +104,6 @@
 
 
   - name: Auto-unseal vault..
-    when: 
-      - vault_sealed
-      - vault_initialized
     block:
       
       - name: Keys to vars..
@@ -123,9 +123,6 @@
 
 
   - name: Settings up vault..
-    when: 
-      - not vault_sealed
-      - vault_initialized
     block:
 
     - name: Check that the root token is loaded into the vars..
